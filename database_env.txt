@@ -1,0 +1,3 @@
+MONGO_URI=mongodb://Rescue_Link:<SOS>@ac-hklan3r-shard-00-00.qfghx6v.mongodb.net:27017,ac-hklan3r-shard-00-01.qfghx6v.mongodb.net:27017,ac-hklan3r-shard-00-02.qfghx6v.mongodb.net:27017/?ssl=true&replicaSet=atlas-r599xo-shard-0&authSource=admin&appName=BugSlayers
+
+JWT_SECRET=bugslayerssecret

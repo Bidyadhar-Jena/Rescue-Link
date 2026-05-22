@@ -1,0 +1,118 @@
+import { useState } from "react"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+
+function Login() {
+  const navigate = useNavigate()
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    aadhaar: "",
+    otp: ""
+  })
+
+  const [otpSent, setOtpSent] = useState(false)
+  const [generatedOtp, setGeneratedOtp] = useState("")
+  const [error, setError] = useState("")
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError("")
+
+    const aadhaarPattern = /^\d{12}$/
+
+    if (!aadhaarPattern.test(form.aadhaar)) {
+      setError("Aadhaar number must be exactly 12 digits")
+      return
+    }
+
+    if (!otpSent) {
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email: form.email,
+          password: form.password,
+          aadhaar: form.aadhaar
+        }
+      )
+
+      localStorage.setItem("token", res.data.token)
+
+      const otp = Math.floor(100000 + Math.random() * 900000).toString()
+      setGeneratedOtp(otp)
+      setOtpSent(true)
+
+      alert(`Demo OTP: ${otp}`)
+      return
+    }
+
+    if (form.otp !== generatedOtp) {
+      setError("Invalid OTP")
+      return
+    }
+
+    navigate("/dashboard")
+  }
+
+  return (
+    <div className="min-h-screen bg-black flex justify-center items-center px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gray-900 p-8 rounded-xl w-96"
+      >
+        <h2 className="text-white text-3xl mb-6">Login</h2>
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        <input
+          type="text"
+          name="aadhaar"
+          placeholder="Aadhaar Number"
+          maxLength="12"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        {otpSent && (
+          <input
+            type="text"
+            name="otp"
+            placeholder="Enter OTP"
+            maxLength="6"
+            onChange={handleChange}
+            className="w-full mb-4 p-3 rounded"
+          />
+        )}
+
+        {error && (
+          <p className="text-red-300 text-sm mb-4">{error}</p>
+        )}
+
+        <button className="bg-red-600 text-white w-full p-3 rounded">
+          {otpSent ? "Verify OTP" : "Send OTP"}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+export default Login

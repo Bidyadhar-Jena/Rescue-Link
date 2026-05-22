@@ -1,0 +1,129 @@
+import { useState } from "react"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+
+function Register() {
+  const navigate = useNavigate()
+  const [error, setError] = useState("")
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    aadhaar: "",
+    bloodGroup: ""
+  })
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    const namePattern = /^[A-Za-z ]{2,}$/
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
+    const aadhaarPattern = /^\d{12}$/
+    const bloodGroupPattern = /^(A|B|AB|O)[+-]$/
+
+    const bloodGroup = form.bloodGroup.toUpperCase()
+
+    setError("")
+
+    if (!namePattern.test(form.name)) {
+      setError("Name must contain alphabets only")
+      return
+    }
+
+    if (!emailPattern.test(form.email)) {
+      setError("Enter a valid email address")
+      return
+    }
+
+    if (!passwordPattern.test(form.password)) {
+      setError("Password must contain uppercase, lowercase, number and special character")
+      return
+    }
+
+    if (!aadhaarPattern.test(form.aadhaar)) {
+      setError("Aadhaar number must be exactly 12 digits")
+      return
+    }
+
+    if (!bloodGroupPattern.test(bloodGroup)) {
+      setError("Blood group must be A+, A-, B+, B-, AB+, AB-, O+ or O-")
+      return
+    }
+
+    await axios.post("http://localhost:5000/api/auth/register", {
+      ...form,
+      bloodGroup
+    })
+
+    alert("Registered Successfully")
+    navigate("/login")
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900 flex justify-center items-center px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-black p-8 rounded-xl w-96"
+      >
+        <h2 className="text-white text-3xl mb-6">Register</h2>
+
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        <input
+          type="text"
+          name="aadhaar"
+          placeholder="Aadhaar Number"
+          maxLength="12"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        <input
+          type="text"
+          name="bloodGroup"
+          placeholder="Blood Group"
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded"
+        />
+
+        {error && (
+          <p className="text-red-300 text-sm mb-4">{error}</p>
+        )}
+
+        <button className="bg-red-600 text-white w-full p-3 rounded">
+          Register
+        </button>
+      </form>
+    </div>
+  )
+}
+
+export default Register
